@@ -162,7 +162,6 @@ in
       # nixos-raspberrypi and its binary cache.
       # Qt draws through EGLFS and SDL presents frames directly through KMS/DRM;
       # no X server, Wayland compositor or display manager is installed.
-      hardware.raspberry-pi.config.all.dt-overlays.vc4-kms-v3d.params.cma-512.enable = true;
       hardware.raspberry-pi.bluetooth.enable = cfg.bluetooth.enable;
       hardware.graphics.enable = true;
 
@@ -182,6 +181,9 @@ in
       ];
 
       boot.kernelParams = [
+        # Hardware video decoding needs substantially more contiguous memory
+        # than the kernel's 32 MiB default on the Pi 4.
+        "cma=256M"
         "video=${cfg.display.connector}:${cfg.display.mode}"
         "quiet"
         "loglevel=3"
