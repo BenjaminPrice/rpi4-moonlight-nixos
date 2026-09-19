@@ -300,6 +300,9 @@ in
           DRM_FORCE_DIRECT = "1";
           QT_QPA_PLATFORM = "eglfs";
           QT_QPA_EGLFS_ALWAYS_SET_MODE = "1";
+          # Qt 6.9 changed the dark Material theme's primary color to a
+          # noticeably washed-out shade. Match Moonlight's upstream fallback.
+          QT_QUICK_CONTROLS_MATERIAL_PRIMARY = "#3F51B5";
           SDL_AUDIODRIVER = "alsa";
           SDL_VIDEODRIVER = "kmsdrm";
         };
