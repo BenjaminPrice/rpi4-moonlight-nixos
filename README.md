@@ -18,16 +18,25 @@ evaluate. Its first real-device boot and streaming tests are still pending.
 - Ethernet DHCP by default, with optional static addressing
 - Headless Wi-Fi setup with iwd
 - Key-only SSH administration
+- Cached Raspberry Pi vendor kernel and matching firmware
+- Pi-specific Wi-Fi/Bluetooth firmware without the generic firmware bundle
 - Flashable compressed SD-card image
 
 ## Build the default image
 
 The image is an AArch64 Linux derivation. Build it on an AArch64 Linux host or
-through an AArch64 Linux remote builder:
+through an AArch64 Linux remote builder. Accept the flake configuration so Nix
+can use the `nixos-raspberrypi` binary cache for the vendor kernel and firmware:
 
 ```console
-nix build .#nixosConfigurations.default.config.system.build.sdImage
+nix --accept-flake-config build .#packages.aarch64-linux.sdImage
 ```
+
+The kernel and firmware come from the maintained
+[`nixos-raspberrypi`](https://github.com/nvmd/nixos-raspberrypi) project. Keep
+this flake's `nixpkgs` input pinned to that project's Nixpkgs revision; changing
+it can invalidate the cached kernel. FFmpeg is the only upstream package this
+project customizes; Moonlight is built against that patched FFmpeg.
 
 The result is a compressed `.img.zst`. Decompress it and write the resulting
 `.img` with Raspberry Pi Imager, Etcher, or `dd`. Flashing replaces the target
@@ -40,14 +49,18 @@ custom configuration.
 
 ## Use as a flake input
 
-Add the project as an input, preferably following the parent flake's nixpkgs:
+Add the project as an input:
 
 ```nix
 inputs.rpi4-moonlight = {
   url = "github:BenjaminPrice/rpi4-moonlight-nixos";
-  inputs.nixpkgs.follows = "nixpkgs";
 };
 ```
+
+Do not make this input's `nixpkgs` follow a different parent input. The pinned
+revision is what allows the Raspberry Pi kernel to come from its binary cache.
+The consuming flake must also accept or configure the cache shown in this
+repository's `nixConfig` when it builds the image.
 
 The constructor produces a complete Raspberry Pi NixOS system while allowing
 ordinary NixOS modules to override the defaults:
@@ -80,7 +93,8 @@ nixosConfigurations.streambox =
 
 `192.0.2.0/24` is a documentation-only network; replace every example value.
 Alternatively, import `inputs.rpi4-moonlight.nixosModules.default` into an
-existing `nixpkgs.lib.nixosSystem` definition.
+existing AArch64 NixOS definition. The module includes the Pi 4 hardware,
+bootloader, Bluetooth, display, and SD-image support.
 
 ## Configuration
 

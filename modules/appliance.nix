@@ -158,15 +158,28 @@ in
 
       system.stateVersion = "26.05";
 
-      # The vendor kernel, firmware and U-Boot setup come from nixos-hardware.
+      # The vendor kernel, matching firmware and U-Boot setup come from
+      # nixos-raspberrypi and its binary cache.
       # Qt draws through EGLFS and SDL presents frames directly through KMS/DRM;
       # no X server, Wayland compositor or display manager is installed.
-      hardware.raspberry-pi."4".fkms-3d = {
-        enable = true;
-        cma = 512;
-      };
+      hardware.raspberry-pi.config.all.dt-overlays.vc4-kms-v3d.params.cma-512.enable = true;
+      hardware.raspberry-pi.bluetooth.enable = cfg.bluetooth.enable;
       hardware.graphics.enable = true;
-      hardware.enableRedistributableFirmware = true;
+
+      # The Pi module enables NixOS's broad redistributable firmware bundle by
+      # default. Keep only the matched Pi radio firmware and regulatory data;
+      # the generic bundle adds hundreds of megabytes for unrelated hardware.
+      hardware.enableRedistributableFirmware = lib.mkForce false;
+      hardware.wirelessRegulatoryDatabase = true;
+      hardware.firmware = [ pkgs.raspberrypiWirelessFirmware ];
+
+      # The image only needs its FAT firmware partition and ext4 root. Avoid
+      # pulling unrelated filesystem tooling and out-of-tree kernel modules
+      # into the appliance closure.
+      boot.supportedFilesystems = lib.mkForce [
+        "ext4"
+        "vfat"
+      ];
 
       boot.kernelParams = [
         "video=${cfg.display.connector}:${cfg.display.mode}"

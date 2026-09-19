@@ -1,13 +1,19 @@
 {
   description = "Minimal NixOS Moonlight appliance for Raspberry Pi 4";
 
-  inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-26.05";
+  nixConfig = {
+    extra-substituters = [ "https://nixos-raspberrypi.cachix.org" ];
+    extra-trusted-public-keys = [
+      "nixos-raspberrypi.cachix.org-1:4iMO9LXa8BqhU+Rpg6LQKiGa2lsNh/j2oiYLNOQ5sPI="
+    ];
+  };
 
-    nixos-hardware = {
-      url = "github:NixOS/nixos-hardware";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
+  inputs = {
+    nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/main";
+
+    # Keep Nixpkgs aligned with nixos-raspberrypi so its vendor kernel and
+    # firmware match the published binary cache.
+    nixpkgs.follows = "nixos-raspberrypi/nixpkgs";
 
     # Raspberry Pi OS carries the V4L2 Request and Broadcom SAND support
     # required by the Pi 4's rpivid HEVC decoder. Pin the exact Debian source
@@ -22,19 +28,23 @@
     inputs@{
       self,
       nixpkgs,
-      nixos-hardware,
+      nixos-raspberrypi,
       rpi-ffmpeg-debian,
       ...
     }:
     let
       applianceModule = {
         imports = [
-          nixos-hardware.nixosModules.raspberry-pi-4
-          "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
+          nixos-raspberrypi.nixosModules.raspberry-pi-4.base
+          nixos-raspberrypi.nixosModules.raspberry-pi-4.display-vc4
+          nixos-raspberrypi.nixosModules.raspberry-pi-4.bluetooth
+          nixos-raspberrypi.nixosModules.sd-image
           ./modules/appliance.nix
         ];
 
-        _module.args = { inherit rpi-ffmpeg-debian; };
+        _module.args = {
+          inherit nixos-raspberrypi rpi-ffmpeg-debian;
+        };
       };
 
       mkRaspberryPiMoonlight =
@@ -42,7 +52,8 @@
           modules ? [ ],
           specialArgs ? { },
         }:
-        nixpkgs.lib.nixosSystem {
+        nixos-raspberrypi.lib.nixosSystem {
+          inherit nixpkgs;
           system = "aarch64-linux";
           inherit specialArgs;
           modules = [ applianceModule ] ++ modules;
