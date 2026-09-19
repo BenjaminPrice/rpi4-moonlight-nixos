@@ -1,0 +1,62 @@
+{
+  "nodes": {
+    "nixos-hardware": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789752250,
+        "narHash": "sha256-q0J27mJDfd4BM9a7KcMVbcRmqyU+goQwudbMIu66qsg=",
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "rev": "b2d7d02644f0002535a3bb51a73780945cdc7ba4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixos-hardware",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1789654592,
+        "narHash": "sha256-vrwAiXmz+0hs/IWXZalFG/Ws6xQRcW+gClUDlfvcfjQ=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "ecc58f32d1069a3e3f8a991e2233d365689f748d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-26.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixos-hardware": "nixos-hardware",
+        "nixpkgs": "nixpkgs",
+        "rpi-ffmpeg-debian": "rpi-ffmpeg-debian"
+      }
+    },
+    "rpi-ffmpeg-debian": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1787829763,
+        "narHash": "sha256-NHG+0lkul3YI9zSqbxT9+XA14YJAM+dUOl1R51jxExw=",
+        "type": "tarball",
+        "url": "https://archive.raspberrypi.com/debian/pool/main/f/ffmpeg/ffmpeg_7.1.5-0%2Bdeb13u1%2Brpt2.debian.tar.xz"
+      },
+      "original": {
+        "type": "tarball",
+        "url": "https://archive.raspberrypi.com/debian/pool/main/f/ffmpeg/ffmpeg_7.1.5-0%2Bdeb13u1%2Brpt2.debian.tar.xz"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}
